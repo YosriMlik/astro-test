@@ -1,0 +1,30 @@
+---
+// src/pages/about.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+export const prerender = true;
+---
+
+<BaseLayout>
+  <title slot="title">About - Go + Astro Integration</title>
+  
+  <h1>About This Project</h1>
+  <div class="content" style="margin: 2rem 0; text-align: left; line-height: 1.6;">
+    <p>
+      This is a demonstration of a Go application serving an Astro frontend. The setup combines:
+    </p>
+    <ul>
+      <li>Go's high-performance backend capabilities</li>
+      <li>Astro's efficient frontend rendering</li>
+      <li>Smooth navigation with a top progress bar</li>
+      <li>All running on a single server to minimize network overhead</li>
+    </ul>
+    <p>
+      The Go application handles API requests and proxies other requests to the Astro application,
+      allowing both to run on the same server while maintaining their respective strengths.
+    </p>
+  </div>
+  <nav>
+    <a href="/">Back to Home</a>
+  </nav>
+</BaseLayout>

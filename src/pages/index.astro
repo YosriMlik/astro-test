@@ -1,0 +1,163 @@
+---
+// src/pages/index.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout>
+  <title slot="title" >Home - Go + Astro Integration</title>
+  
+  <h1 class="text-4xl dark:text-red ">Go + Astro Integration</h1>
+  <div class="message">
+    Message from backend: 
+    <span id="message-container">
+      <span class="loader"></span>
+    </span>
+  </div>
+  <p>
+    This page is rendered by Astro, but the data comes from the Go backend API.
+  </p>
+  <nav>
+    <a href="/about">Go to About Page</a>
+  </nav>
+</BaseLayout>
+
+<style>
+  .loader {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 69, 0, 0.3);
+    border-radius: 50%;
+    border-top-color: #ff4500;
+    animation: spin 1s ease-in-out infinite;
+    vertical-align: middle;
+    margin-left: 5px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+
+
+
+<script is:inline>
+  // Create a state object to manage data fetching state
+  const state = {
+    isLoading: true,
+    data: null,
+    error: null
+  };
+
+  fetchData();
+  
+  function waitForElement(selector, callback, maxAttempts = 50, interval = 100) {
+    let attempts = 0;
+    
+    const checkElement = function() {
+      const element = document.getElementById(selector);
+      if (element) {
+        callback(element);
+        return;
+      }
+      
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(checkElement, interval);
+      } else {
+        console.log(`Element ${selector} not found after ${maxAttempts} attempts`);
+      }
+    };
+    
+    checkElement();
+  }
+
+  // Function to fetch data from the API
+  async function fetchData() {
+    try {
+      
+      // Simulate delay (optional)
+      // await new Promise(resolve => setTimeout(resolve, 3000));
+      console.log('Fetching data...');
+      const response = await fetch('http://localhost:8080/api/hello-message');
+      state.data = await response.json();
+      console.log('Got data !!');
+      const messageContainer = document.getElementById('message-container');
+    if (messageContainer) {
+      state.isLoading = false;
+      console.log('update after fetching and setting loading to FALSE ..');
+      updateUI(messageContainer);
+      return state.data;
+    } else {
+      console.log('Message container not found yet, waiting...');
+      // Wait for the message container to be available
+      waitForElement('message-container', (element) => {
+        console.log('Message container found after waiting');
+        updateUI(element);
+      });
+    }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      state.error = error instanceof Error ? error : new Error(String(error));
+      state.isLoading = false;
+      return null;
+    }
+  }
+
+  // Function to update the DOM with fetched data
+  function updateUI(messageContainer) {
+    console.log('Updating UI...', state.isLoading);
+    if (state.isLoading) {
+      console.log("ui updated because state.isLoading is true");
+      // Keep the loader visible on first visit
+      return;
+    } else if (state.error) {
+      messageContainer.innerHTML = '<strong>Error loading data</strong>';
+    } else if (state.data && state.data.message) {
+      console.log("ui updated because state.data && state.data.message is true"); 
+      messageContainer.innerHTML = `<strong>${state.data.message}</strong>`;
+    } else {
+      console.log("ui updated because everthing is false");
+      messageContainer.innerHTML = '<strong>No data received</strong>';
+    }
+    
+  }
+  // Fetch data immidiately after navigation to '/' and before page preparation
+  document.addEventListener('astro:before-preparation', () => {
+    const messageContainer = document.getElementById('message-container');
+    if (!messageContainer && window.location.pathname !== '/') {
+      console.log('Before preparation, loading', state.isLoading);
+      fetchData();
+    }
+  });
+
+
+
+  // document.addEventListener('astro:after-preparation', () => {
+  //   console.log("after preparation, loading", state.isLoading)
+  //   const messageContainer = document.getElementById('message-container');
+  //   if (messageContainer) {
+  //     //messageContainer.innerHTML = `<span class="loader"></span>`;
+  //     updateUI(messageContainer);
+  //   }
+  // });
+
+  // Update UI after navigation preparation is complete
+  // document.addEventListener('astro:page-load', () => {
+  //   const messageContainer = document.getElementById('message-container');
+  //   if (messageContainer) {
+  //     console.log('Page load');
+  //     //messageContainer.innerHTML = `<span class="loader"></span>`;
+  //     updateUI(messageContainer);
+  //   }
+  // });
+
+  // Also update UI when page is fully loaded
+  // document.addEventListener('astro:page-load', () => {
+  //   console.log('Page loaded, ensuring UI is updated');
+  //   const messageContainer = document.getElementById('message-container');
+  //   if (messageContainer) {
+  //     updateUI(messageContainer);
+  //   }
+  // });
+</script>

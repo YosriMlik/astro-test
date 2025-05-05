@@ -1,0 +1,84 @@
+---
+---
+
+<!-- Progress bar HTML -->
+<div class="progress-bar" id="progressBar"></div>
+
+<style>
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: #0080ff; /* Orange color, customizable */
+    z-index: 9999;
+    shadow="0 0 10px #2299DD,0 0 5px #2299DD" 
+    transition: width 0.3s ease-out;
+  }
+</style>
+
+<script is:inline>
+  // Function to get the progress bar element
+  function getProgressBar() {
+    return document.getElementById('progressBar');
+  }
+
+  // Flag to prevent multiple animations
+  let isAnimating = false;
+
+  // Start progress bar on page load initiation
+  document.addEventListener('astro:before-preparation', () => {
+    //console.log("before-preparation");
+    const progressBar = getProgressBar();
+    if (progressBar && !isAnimating) {
+        isAnimating = true;
+        
+        // Reset any previous state
+        progressBar.style.width = '0';
+        progressBar.style.opacity = '1';
+        progressBar.style.transition = 'width 01s linear';
+        
+        // Set active state
+        progressBar.style.width = '95%';
+    } else {
+      console.error('Progress bar element not found or animation in progress');
+    }
+  });
+
+  // Complete progress bar after page swap
+  document.addEventListener('astro:after-swap', () => {
+      //console.log("page-load");
+    const progressBar = getProgressBar();
+    if (progressBar && isAnimating) {
+        // Set complete state - fast transition to 100%
+        progressBar.style.transition = 'width 0.2s ease-out';
+        progressBar.style.width = '100%';
+        
+        // Fade out after reaching 100%
+        setTimeout(() => {
+          progressBar.style.transition = 'opacity 0.3s ease-out';
+          progressBar.style.opacity = '0';
+          
+          // Only reset the width after the bar is fully invisible
+          setTimeout(() => {
+            // Hide the bar completely before resetting
+            progressBar.style.display = 'none';
+            progressBar.style.width = '0';
+            
+            // Make it visible again but with 0 width and full opacity
+            setTimeout(() => {
+              progressBar.style.display = 'block';
+              progressBar.style.opacity = '1';
+              progressBar.style.transition = 'width 0.3s ease-out';
+              isAnimating = false;
+            }, 50);
+          }, 300); // Match opacity transition duration
+        }, 200); // Short delay to show full bar
+    } else if (!isAnimating) {
+      console.log('No animation in progress, skipping completion');
+    } else {
+      console.error('Progress bar element not found');
+    }
+  });
+</script>

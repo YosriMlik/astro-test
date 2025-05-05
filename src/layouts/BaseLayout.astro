@@ -1,0 +1,20 @@
+---
+  import "./BaseLayout.css";
+  import ProgressBar from '../components/ProgressBar.astro';
+  import { ClientRouter } from "astro:transitions";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Go + Astro Integration</title>
+    <ClientRouter />
+  </head>
+  <body>
+    <ProgressBar />
+      <div class="container">
+        <slot />
+      </div>    
+  </body>
+</html>
